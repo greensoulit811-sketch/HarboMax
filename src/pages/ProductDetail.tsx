@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, ShoppingBag, Package } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
+import { trackFBEvent } from "@/lib/fb-events";
 
 type Product = Database["public"]["Tables"]["products"]["Row"];
 
@@ -21,7 +21,17 @@ const ProductDetail = () => {
         .eq("id", id)
         .eq("is_active", true)
         .single();
-      setProduct(data);
+      
+      if (data) {
+        setProduct(data);
+        trackFBEvent("ViewContent", {
+          content_name: data.name,
+          content_ids: [data.id],
+          content_type: "product",
+          value: data.price,
+          currency: "BDT",
+        });
+      }
       setLoading(false);
     };
     fetch();

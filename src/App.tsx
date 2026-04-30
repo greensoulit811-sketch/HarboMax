@@ -8,25 +8,29 @@ import AdminLogin from "./pages/AdminLogin.tsx";
 import AdminDashboard from "./pages/AdminDashboard.tsx";
 import ProductDetail from "./pages/ProductDetail.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import PixelTracker from "./components/PixelTracker.tsx";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/admin" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <PixelTracker />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/admin" element={<AdminLogin />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;

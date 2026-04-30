@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Check, Phone, Minus, Plus, MapPin, User, Truck, ShoppingBag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { trackFBEvent, sendServerEvent } from "@/hooks/useFacebookPixel";
+import { trackFBEvent, sendServerEvent } from "@/lib/fb-events";
 import type { Database } from "@/integrations/supabase/types";
 
 type Product = Database["public"]["Tables"]["products"]["Row"];
@@ -20,6 +20,7 @@ const CheckoutSection = () => {
   const [submitting, setSubmitting] = useState(false);
   const [loadingProducts, setLoadingProducts] = useState(true);
   const { toast } = useToast();
+  const [initiated, setInitiated] = useState(false);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -31,7 +32,15 @@ const CheckoutSection = () => {
         .order("created_at", { ascending: false });
       const list = data || [];
       setProducts(list);
-      if (list.length > 0) setSelectedProduct(list[0]);
+      if (list.length > 0) {
+        setSelectedProduct(list[0]);
+        // Initial AddToCart for first selected product
+        trackFBEvent("AddToCart", {
+          content_name: list[0].name,
+          value: list[0].price,
+          currency: "BDT",
+        });
+      }
       setLoadingProducts(false);
     };
     fetchProducts();
@@ -137,7 +146,15 @@ const CheckoutSection = () => {
             {products.map((product) => (
               <button
                 key={product.id}
-                onClick={() => { setSelectedProduct(product); setQuantity(1); }}
+                onClick={() => { 
+                  setSelectedProduct(product); 
+                  setQuantity(1); 
+                  trackFBEvent("AddToCart", {
+                    content_name: product.name,
+                    value: product.price,
+                    currency: "BDT",
+                  });
+                }}
                 className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left ${
                   selectedProduct?.id === product.id
                     ? "border-primary bg-primary/5 ring-1 ring-primary"
@@ -200,7 +217,13 @@ const CheckoutSection = () => {
           <input
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value);
+              if (!initiated && e.target.value.length > 0) {
+                setInitiated(true);
+                trackFBEvent("InitiateCheckout");
+              }
+            }}
             placeholder="আপনার পুরো নাম লিখুন"
             className="w-full px-4 py-3 rounded-xl border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           />

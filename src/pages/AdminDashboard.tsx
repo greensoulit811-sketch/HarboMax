@@ -42,6 +42,7 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState<"orders" | "products" | "settings">("orders");
   const [fbPixelId, setFbPixelId] = useState("");
   const [fbCapiToken, setFbCapiToken] = useState("");
+  const [fbTestCode, setFbTestCode] = useState("");
   const [copyrightText, setCopyrightText] = useState("© ২০২৫ Libsun — সকল স্বত্ব সংরক্ষিত");
   const [settingsLoading, setSettingsLoading] = useState(false);
   const [settingsSaving, setSettingsSaving] = useState(false);
@@ -80,10 +81,11 @@ const AdminDashboard = () => {
 
   const fetchSettings = async () => {
     setSettingsLoading(true);
-    const { data } = await supabase.from("site_settings").select("key, value").in("key", ["fb_pixel_id", "fb_capi_token", "copyright_text"]);
+    const { data } = await supabase.from("site_settings").select("key, value").in("key", ["fb_pixel_id", "fb_capi_token", "fb_test_event_code", "copyright_text"]);
     if (data) {
       setFbPixelId(data.find((s) => s.key === "fb_pixel_id")?.value || "");
       setFbCapiToken(data.find((s) => s.key === "fb_capi_token")?.value || "");
+      setFbTestCode(data.find((s) => s.key === "fb_test_event_code")?.value || "");
       setCopyrightText(data.find((s) => s.key === "copyright_text")?.value || "© ২০২৫ Libsun — সকল স্বত্ব সংরক্ষিত");
     }
     setSettingsLoading(false);
@@ -94,6 +96,7 @@ const AdminDashboard = () => {
     const upsertKeys = [
       { key: "fb_pixel_id", value: fbPixelId },
       { key: "fb_capi_token", value: fbCapiToken },
+      { key: "fb_test_event_code", value: fbTestCode },
       { key: "copyright_text", value: copyrightText },
     ];
     for (const item of upsertKeys) {
@@ -497,6 +500,17 @@ const AdminDashboard = () => {
                     className="w-full px-4 py-3 rounded-xl border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm"
                   />
                   <p className="text-xs text-muted-foreground mt-1">Events Manager → Settings → Generate Access Token</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-1.5 block">CAPI Test Event Code (Optional)</label>
+                  <input
+                    type="text"
+                    value={fbTestCode}
+                    onChange={(e) => setFbTestCode(e.target.value)}
+                    placeholder="TEST12345"
+                    className="w-full px-4 py-3 rounded-xl border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring text-sm"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">Events Manager → Test Events tab থেকে পাবেন (শুধু টেস্টিং এর জন্য)</p>
                 </div>
 
                 <hr className="border-border my-6" />
